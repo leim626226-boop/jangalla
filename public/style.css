@@ -125,6 +125,7 @@ table.list .author { color: #1a4d80; }
 .form-row input[type="text"], .form-row input[type="password"], .form-row select, .form-row textarea {
   width: 100%; border: 1px solid #c4ccd4; border-radius: 5px; padding: 10px 12px; font-size: 14px;
 }
+.form-row input[type="file"] { width: 100%; padding: 9px; border: 1px dashed #aab7c4; border-radius: 5px; background: #fafcfe; }
 .form-row textarea { min-height: 220px; resize: vertical; line-height: 1.6; }
 .form-row input:focus, .form-row textarea:focus { outline: 2px solid #9cc3e8; border-color: #1a6fc4; }
 .form-row .hint { font-size: 12px; color: #999; margin-top: 4px; }
@@ -134,6 +135,23 @@ table.list .author { color: #1a4d80; }
 
 .auth-card { max-width: 420px; margin: 40px auto; }
 .auth-card h1 { font-size: 20px; color: #173a5e; margin-bottom: 14px; }
+.access-message { color: #555; line-height: 1.7; }
+.access-message .form-actions { margin-top: 14px; }
+.verification-note { margin: 0 16px 16px; padding: 10px 12px; background: #f1f6fb; border-radius: 5px; color: #47647e; font-size: 12px; line-height: 1.6; }
+.member-attestation label { display: flex !important; align-items: flex-start; gap: 8px; line-height: 1.5; }
+.member-attestation input { margin-top: 3px; flex-shrink: 0; }
+.verification-list { padding: 4px 16px 12px; }
+.verification-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 14px 0; border-bottom: 1px solid #eef1f4; }
+.verification-row:last-child { border-bottom: 0; }
+.verification-details { font-size: 13px; color: #666; }
+.verification-details strong { color: #222; }
+.verification-details > div { margin-top: 4px; }
+.verification-status { font-weight: 700; }
+.verification-status.pending { color: #bb7414; }
+.verification-status.approved { color: #248246; }
+.verification-status.rejected { color: #c0392b; }
+.verification-photo { display: block; max-width: min(100%, 440px); max-height: 280px; object-fit: contain; object-position: left top; margin-top: 10px; border: 1px solid #d6dbe0; border-radius: 5px; background: #f7f8fa; }
+.verification-actions { display: flex; gap: 6px; flex-shrink: 0; }
 
 /* 사이드/관리자 */
 .admin-tools { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
@@ -156,4 +174,8 @@ table.list .author { color: #1a4d80; }
   .layout { flex-direction: column; }
   .layout .side { width: 100%; }
   .post-body iframe { width: 100%; }
+}
+@media (max-width: 520px) {
+  .verification-row { flex-direction: column; }
+  .verification-photo { max-height: 220px; }
 }

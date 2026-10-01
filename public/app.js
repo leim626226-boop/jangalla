@@ -75,7 +75,7 @@ function renderUserArea() {
     const isAdmin = me.role === 'admin';
     $userArea.innerHTML = `
       <span class="nick">${esc(me.nickname)}${isAdmin ? ' ⭐관리자' : ''}</span>
-      ${isAdmin ? '<a class="btn sm" href="#/admin">게시판 관리</a>' : ''}
+      ${isAdmin ? '<a class="btn sm" href="#/admin">인증·게시판 관리</a>' : ''}
       <button class="btn sm" id="logoutBtn">로그아웃</button>`;
     document.getElementById('logoutBtn').onclick = async () => {
       await api('/api/logout', { method: 'POST' });
@@ -87,7 +87,7 @@ function renderUserArea() {
   } else {
     $userArea.innerHTML = `
       <a class="btn sm" href="#/login">로그인</a>
-      <a class="btn sm primary" href="#/join">회원가입</a>`;
+      <a class="btn sm primary" href="#/join">인증 신청</a>`;
   }
 }
 
@@ -104,6 +104,11 @@ async function render() {
   const { segs, query } = parseHash();
   highlightNav();
   try {
+    const isAuthPage = ['login', 'join', 'reverify'].includes(segs[0]);
+    if (!isAuthPage && (!me || (!me.verified && me.role !== 'admin'))) {
+      pageAccess();
+      return;
+    }
     if (segs.length === 0) return await pageBoard('free', query);
     if (segs[0] === 'b' && segs[1]) return await pageBoard(segs[1], query);
     if (segs[0] === 'p' && segs[1]) return await pagePost(segs[1]);
@@ -111,6 +116,7 @@ async function render() {
     if (segs[0] === 'edit' && segs[1]) return await pageEdit(segs[1]);
     if (segs[0] === 'login') return pageLogin();
     if (segs[0] === 'join') return pageJoin();
+    if (segs[0] === 'reverify') return pageReverify();
     if (segs[0] === 'admin') return pageAdmin();
     return await pageBoard('free', query);
   } catch (e) {
@@ -185,11 +191,10 @@ async function pageBoard(slug, query) {
         <div class="card">
           <div class="card-head"><h1 style="font-size:15px;">💡 안내</h1></div>
           <div style="padding:12px 16px;font-size:13px;color:#666;line-height:1.7;">
-            로그인 없이도 닉네임만으로<br>글쓰기와 댓글을 쓸 수 있어요.<br>
-            회원가입하면 더 편하게 이용할 수 있습니다.
+            부산기계공고 학생·선생님만<br>인증 후 이용할 수 있습니다.
             <div style="margin-top:10px;display:flex;gap:6px;">
               <a class="btn sm primary" href="#/login">로그인</a>
-              <a class="btn sm" href="#/join">회원가입</a>
+              <a class="btn sm" href="#/join">인증 신청</a>
             </div>
           </div>
         </div>` : ''}
@@ -225,7 +230,7 @@ async function pagePost(id) {
         <div class="c-meta">
           <span class="author">${esc(c.author_name)}</span>
           <span>${fmtDate(c.created_at)}</span>
-          <button class="c-del" data-id="${c.id}" data-anon="${c.member_id ? 0 : 1}">삭제</button>
+          ${(c.mine || isAdmin || c.needsPassword) ? `<button class="c-del" data-id="${c.id}" data-anon="${c.needsPassword ? 1 : 0}">삭제</button>` : ''}
         </div>
         <div class="c-body">${esc(c.content)}</div>
       </div>`).join('')
@@ -263,7 +268,7 @@ async function pagePost(id) {
           <input type="text" name="nickname" placeholder="닉네임" required maxlength="15">
           <input type="password" name="password" placeholder="삭제용 비밀번호(선택)">
         </div>` : ''}
-        <textarea name="content" placeholder="${me ? '댓글을 입력하세요' : '로그인 없이 닉네임만으로 댓글 작성 가능'}" required></textarea>
+        <textarea name="content" placeholder="댓글을 입력하세요" required></textarea>
         <div class="submit-row" style="margin-top:8px;">
           <button class="btn primary" type="submit">댓글 달기</button>
         </div>
@@ -306,8 +311,7 @@ async function pagePost(id) {
   if (delBtn) {
     delBtn.onclick = async () => {
       let body = {};
-      if (!mine && !(isAdmin)) { /* 관리자 아님 & 내 글 아님: 비번 필요 */ }
-      if (!mine) {
+      if (!mine && !isAdmin) {
         const pw = prompt('글 삭제 비밀번호를 입력하세요');
         if (pw === null) return;
         body = { password: pw };
@@ -400,7 +404,7 @@ async function pageWrite(slug) {
 async function pageEdit(id) {
   const { post, mine } = await api(`/api/posts/${id}`);
   const isAdmin = me && me.role === 'admin';
-  if (!mine && !isAdmin && post.member_id) {
+  if (!mine && !isAdmin && !post.isAnonymous) {
     $app.innerHTML = `<div class="alert-error">본인 글만 수정할 수 있습니다.</div>`;
     return;
   }
@@ -408,7 +412,7 @@ async function pageEdit(id) {
     <div class="card">
       <div class="card-head"><h1>📝 글 수정</h1></div>
       <form class="form-card" id="editForm">
-        ${!post.member_id ? `
+        ${post.isAnonymous ? `
         <div class="form-row">
           <label>작성 시 비밀번호</label>
           <input type="password" name="password" placeholder="비밀번호">
@@ -459,7 +463,8 @@ function pageLogin() {
           <button class="btn primary" type="submit" style="width:100%;">로그인</button>
         </div>
         <div class="hint" style="margin-top:10px;text-align:center;">
-          계정이 없나요? <a href="#/join">회원가입</a> · 로그인 없이도 글쓰기 가능!
+          가입 신청이 필요하신가요? <a href="#/join">인증 신청</a><br>
+          인증이 반려되었나요? <a href="#/reverify">다시 신청</a>
         </div>
       </form>
     </div>`;
@@ -468,42 +473,135 @@ function pageLogin() {
     try {
       await api('/api/login', { method: 'POST', body: { login_id: e.target.login_id.value, password: e.target.password.value } });
       await loadMe();
+      await loadBoards();
       goto('#/b/free');
     } catch (err) { alert(err.message); }
   };
 }
 
+function startAutoLoginCountdown(loginId, password) {
+  $app.innerHTML = `
+    <div class="card auth-card">
+      <h1>인증 신청이 접수되었습니다</h1>
+      <div class="form-card access-message">
+        <p>잠시 후 자동 승인되어 로그인됩니다.</p>
+        <div class="hint">제출한 사진의 진위 여부를 자동 대조하지는 않습니다.</div>
+      </div>
+    </div>`;
+
+  const finishLogin = async () => {
+    try {
+      await api('/api/login', { method: 'POST', body: { login_id: loginId, password } });
+      await loadMe();
+      await loadBoards();
+      goto('#/b/free');
+    } catch (err) {
+      if (err.message.includes('5초')) {
+        setTimeout(finishLogin, 500);
+        return;
+      }
+      $app.innerHTML = `
+        <div class="card auth-card">
+          <h1>자동 로그인에 실패했습니다</h1>
+          <div class="form-card access-message"><p>${esc(err.message)}</p><div class="form-actions"><a class="btn primary" href="#/login">로그인 화면으로</a></div></div>
+        </div>`;
+    }
+  };
+
+  setTimeout(finishLogin, 5000);
+}
+
+function pageAccess() {
+  $app.innerHTML = `
+    <div class="card auth-card">
+      <h1>부기공 구성원 전용</h1>
+      <div class="form-card access-message">
+        <p>부산기계공고 학생 또는 선생님 인증 후 이용할 수 있습니다.</p>
+        <div class="form-actions">
+          <a class="btn" href="#/login">로그인</a>
+          <a class="btn primary" href="#/join">학생·교직원 인증 신청</a>
+        </div>
+      </div>
+    </div>`;
+}
+
 function pageJoin() {
   $app.innerHTML = `
     <div class="card auth-card">
-      <h1>회원가입</h1>
-      <form class="form-card" id="joinForm" style="padding:0;">
+      <h1>부기공 구성원 인증 신청</h1>
+      <form class="form-card" id="joinForm" style="padding:0;" enctype="multipart/form-data">
         <div class="form-row">
-          <label>아이디 (영문/숫자 3~20자)</label>
-          <input type="text" name="login_id" required>
+          <label>구성원 유형</label>
+          <select name="member_type" required>
+            <option value="student">학생</option>
+            <option value="teacher">선생님</option>
+          </select>
         </div>
         <div class="form-row">
-          <label>비밀번호 (4자 이상)</label>
-          <input type="password" name="password" required>
+          <label>아이디 (영문/숫자 3~20자)</label>
+          <input type="text" name="login_id" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+">
+        </div>
+        <div class="form-row">
+          <label>비밀번호 (8자 이상)</label>
+          <input type="password" name="password" required minlength="8" autocomplete="new-password">
         </div>
         <div class="form-row">
           <label>닉네임 (2~15자)</label>
           <input type="text" name="nickname" required maxlength="15">
         </div>
+        <div class="form-row">
+          <label>학생증 또는 교직원증 사진 (최대 8MB)</label>
+          <input type="file" name="school_id_photo" accept="image/jpeg,image/png,image/webp" capture="environment" required>
+          <div class="hint">JPG, PNG, WEBP 사진만 제출할 수 있습니다. 주민등록번호 등 인증에 필요 없는 개인정보는 가려 주세요. 사진은 자동 승인 후 삭제됩니다.</div>
+        </div>
+        <div class="form-row member-attestation">
+          <label><input type="checkbox" name="member_attestation" required> 나는 부산기계공고 학생 또는 선생님이며, 본인 신분증 사진을 제출합니다.</label>
+        </div>
+        <div class="verification-note">신청 5초 후 자동 승인·로그인됩니다. 사진이 실제 학교 신분증인지 자동 대조하지 않으니, 본인 확인 후 신청해 주세요.</div>
         <div class="form-actions">
-          <button class="btn primary" type="submit" style="width:100%;">가입하기</button>
+          <button class="btn primary" type="submit" style="width:100%;">인증 신청하기</button>
         </div>
       </form>
     </div>`;
   document.getElementById('joinForm').onsubmit = async (e) => {
     e.preventDefault();
     try {
-      await api('/api/join', {
-        method: 'POST',
-        body: { login_id: e.target.login_id.value, password: e.target.password.value, nickname: e.target.nickname.value },
-      });
-      await loadMe();
-      goto('#/b/free');
+      const formData = new FormData(e.target);
+      const loginId = e.target.login_id.value;
+      const password = e.target.password.value;
+      await api('/api/join', { method: 'POST', body: formData });
+      startAutoLoginCountdown(loginId, password);
+    } catch (err) { alert(err.message); }
+  };
+}
+
+function pageReverify() {
+  $app.innerHTML = `
+    <div class="card auth-card">
+      <h1>인증 다시 신청하기</h1>
+      <form class="form-card" id="reverifyForm" style="padding:0;">
+        <div class="form-row"><label>아이디</label><input type="text" name="login_id" required></div>
+        <div class="form-row"><label>비밀번호</label><input type="password" name="password" required autocomplete="current-password"></div>
+        <div class="form-row">
+          <label>구성원 유형</label>
+          <select name="member_type" required><option value="student">학생</option><option value="teacher">선생님</option></select>
+        </div>
+        <div class="form-row">
+          <label>학생증 또는 교직원증 사진 (최대 8MB)</label>
+          <input type="file" name="school_id_photo" accept="image/jpeg,image/png,image/webp" capture="environment" required>
+          <div class="hint">주민등록번호 등 인증에 필요 없는 개인정보는 가려 주세요. 사진은 자동 승인 후 삭제됩니다.</div>
+        </div>
+        <div class="form-row member-attestation"><label><input type="checkbox" name="member_attestation" required> 나는 부산기계공고 학생 또는 선생님이며, 본인 신분증 사진을 제출합니다.</label></div>
+        <div class="form-actions"><button class="btn primary" type="submit" style="width:100%;">다시 신청하기</button></div>
+      </form>
+    </div>`;
+  document.getElementById('reverifyForm').onsubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const loginId = e.target.login_id.value;
+      const password = e.target.password.value;
+      await api('/api/verification/resubmit', { method: 'POST', body: new FormData(e.target) });
+      startAutoLoginCountdown(loginId, password);
     } catch (err) { alert(err.message); }
   };
 }
@@ -514,8 +612,25 @@ async function pageAdmin() {
     $app.innerHTML = `<div class="alert-error">관리자만 접근할 수 있습니다.</div>`;
     return;
   }
-  const list = await api('/api/boards');
+  const [list, verificationData] = await Promise.all([
+    api('/api/boards'),
+    api('/api/admin/verifications'),
+  ]);
+  const requests = verificationData.requests;
+  const verificationHtml = requests.length ? requests.map((request) => `
+    <div class="verification-row">
+      <div class="verification-details">
+        <strong>${esc(request.nickname)}</strong> <span>(${esc(request.login_id)})</span>
+        <div>${request.member_type === 'student' ? '학생' : '선생님'} · ${fmtDate(request.created_at)} · <b class="verification-status ${request.status}">${request.status === 'pending' ? '검토 대기' : request.status === 'approved' ? '승인' : '반려'}</b></div>
+        ${request.status === 'pending' ? `<img class="verification-photo" src="/api/admin/verifications/${request.id}/photo" alt="${esc(request.nickname)} 인증 사진">` : ''}
+      </div>
+      ${request.status === 'pending' ? `<div class="verification-actions"><button class="btn sm primary" data-review="approved" data-id="${request.id}">승인</button><button class="btn sm danger" data-review="rejected" data-id="${request.id}">반려</button></div>` : ''}
+    </div>`).join('') : '<div class="empty">인증 신청이 없습니다.</div>';
   $app.innerHTML = `
+    <div class="card">
+      <div class="card-head"><h1>🪪 구성원 인증 신청</h1></div>
+      <div class="verification-list">${verificationHtml}</div>
+    </div>
     <div class="card">
       <div class="card-head"><h1>⚙️ 게시판 관리</h1><a class="btn sm" href="#/b/free">나가기</a></div>
       <div class="admin-tools">
@@ -535,6 +650,18 @@ async function pageAdmin() {
         </form>
       </div>
     </div>`;
+
+  $app.querySelectorAll('[data-review]').forEach((button) => {
+    button.onclick = async () => {
+      const decision = button.dataset.review;
+      const prompt = decision === 'approved' ? '이 신청을 승인할까요?' : '이 신청을 반려할까요?';
+      if (!confirm(prompt)) return;
+      try {
+        await api(`/api/admin/verifications/${button.dataset.id}/review`, { method: 'POST', body: { decision } });
+        await pageAdmin();
+      } catch (err) { alert(err.message); }
+    };
+  });
 
   $app.querySelectorAll('[data-del]').forEach((btn) => {
     btn.onclick = async () => {
@@ -563,7 +690,9 @@ async function pageAdmin() {
 // ---------- 시작 ----------
 (async function init() {
   try {
-    await Promise.all([loadMe(), loadBoards()]);
+    await loadMe();
+    if (me && (me.verified || me.role === 'admin')) await loadBoards();
+    else $nav.innerHTML = '';
   } catch (e) {
     $app.innerHTML = `<div class="alert-error">서버에 연결할 수 없습니다: ${esc(e.message)}</div>`;
     return;
