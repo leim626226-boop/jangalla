@@ -1,0 +1,159 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  background: #e9ebee;
+  color: #222;
+}
+a { color: #1a4d80; text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; font-size: 14px; }
+
+.topbar { background: #173a5e; color: #fff; }
+.topbar-inner {
+  max-width: 1080px; margin: 0 auto; padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.logo { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+.logo span { color: #ffd24d; }
+.user-area { display: flex; gap: 8px; align-items: center; font-size: 13px; flex-wrap: wrap; }
+.user-area .btn { padding: 6px 12px; }
+
+.board-nav { background: #fff; border-bottom: 2px solid #173a5e; position: sticky; top: 0; z-index: 10; }
+.board-nav-inner {
+  max-width: 1080px; margin: 0 auto; padding: 0 8px;
+  display: flex; overflow-x: auto; gap: 2px;
+}
+.board-nav a {
+  padding: 11px 16px; white-space: nowrap; font-weight: 700; font-size: 14px; color: #333;
+}
+.board-nav a.active { color: #fff; background: #173a5e; border-radius: 6px 6px 0 0; }
+
+.container { max-width: 1080px; margin: 18px auto 40px; padding: 0 12px; }
+
+.card { background: #fff; border: 1px solid #d6dbe0; border-radius: 8px; margin-bottom: 14px; overflow: hidden; }
+.card-head {
+  background: #f5f7f9; padding: 12px 16px; border-bottom: 1px solid #e2e6ea;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+}
+.card-head h1 { font-size: 18px; color: #173a5e; }
+.card-head .sub { font-size: 12px; color: #888; font-weight: 400; display: block; margin-top: 2px; }
+
+.btn {
+  display: inline-block; border: 1px solid #c4ccd4; background: #fff; color: #333;
+  padding: 8px 14px; border-radius: 5px; font-size: 13px; font-weight: 700;
+}
+.btn:hover { background: #f0f3f6; text-decoration: none; }
+.btn.primary { background: #1a6fc4; border-color: #1a6fc4; color: #fff; }
+.btn.primary:hover { background: #155a9e; }
+.btn.danger { color: #c0392b; border-color: #e0b4b4; }
+.btn.danger:hover { background: #fdf2f0; }
+.btn.sm { padding: 4px 10px; font-size: 12px; }
+
+/* 글 목록 */
+table.list { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.list th {
+  background: #f5f7f9; padding: 9px 8px; border-bottom: 2px solid #dde3e9; color: #555; font-size: 12px;
+}
+table.list td { padding: 9px 8px; border-bottom: 1px solid #eef1f4; text-align: center; color: #555; }
+table.list td.title { text-align: left; }
+table.list td.title a { color: #222; font-weight: 600; }
+table.list td.title .cmt { color: #e05c2a; font-size: 12px; margin-left: 4px; }
+table.list tr:hover td { background: #fafcfe; }
+table.list .author { color: #1a4d80; }
+.empty { padding: 40px 16px; text-align: center; color: #999; font-size: 14px; }
+
+.list-tools {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid #eef1f4;
+}
+.search-form { display: flex; gap: 6px; }
+.search-form input { border: 1px solid #c4ccd4; padding: 7px 10px; border-radius: 5px; width: 200px; }
+
+.pagination { display: flex; justify-content: center; gap: 4px; padding: 14px; flex-wrap: wrap; }
+.pagination a {
+  padding: 6px 11px; border: 1px solid #d6dbe0; border-radius: 4px; font-size: 13px; color: #333;
+}
+.pagination a.current { background: #173a5e; color: #fff; border-color: #173a5e; font-weight: 700; }
+
+/* 글 보기 */
+.post-head { padding: 16px; border-bottom: 1px solid #eef1f4; }
+.post-head h1 { font-size: 20px; margin-bottom: 8px; line-height: 1.4; }
+.post-meta { font-size: 12px; color: #888; display: flex; gap: 12px; flex-wrap: wrap; }
+.post-meta .author { color: #1a4d80; font-weight: 700; }
+.post-actions { margin-left: auto; display: flex; gap: 6px; }
+.post-body { padding: 18px 16px; font-size: 15px; line-height: 1.75; word-break: break-word; }
+.post-body img { max-width: 100%; border-radius: 4px; margin: 6px 0; }
+.post-body video { max-width: 100%; border-radius: 4px; margin: 6px 0; }
+.post-body iframe { max-width: 100%; border: 0; border-radius: 4px; margin: 6px 0; aspect-ratio: 16/9; width: 640px; height: 360px; }
+.post-body a { word-break: break-all; }
+.attach-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 12px; }
+.attach-grid img { max-width: 320px; max-height: 320px; border: 1px solid #e2e6ea; border-radius: 4px; }
+
+.vote-bar { display: flex; justify-content: center; gap: 10px; padding: 14px 16px; border-top: 1px solid #eef1f4; }
+.vote-btn {
+  border: 1px solid #d6dbe0; background: #fafbfc; border-radius: 6px;
+  padding: 10px 26px; font-size: 15px; font-weight: 800; color: #333;
+}
+.vote-btn.up:hover { border-color: #e05c2a; color: #e05c2a; background: #fff5f0; }
+.vote-btn.down:hover { border-color: #1a4d80; color: #1a4d80; background: #f0f6fc; }
+.vote-btn.active.up { background: #e05c2a; color: #fff; border-color: #e05c2a; }
+.vote-btn.active.down { background: #1a4d80; color: #fff; border-color: #1a4d80; }
+
+/* 댓글 */
+.comment-head { padding: 12px 16px; font-weight: 700; font-size: 14px; background: #f5f7f9; border-bottom: 1px solid #e2e6ea; }
+.comment { padding: 12px 16px; border-bottom: 1px solid #f0f2f5; }
+.comment:last-child { border-bottom: 0; }
+.comment .c-meta { font-size: 12px; color: #888; display: flex; gap: 8px; align-items: center; margin-bottom: 5px; }
+.comment .c-meta .author { color: #1a4d80; font-weight: 700; }
+.comment .c-body { font-size: 14px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
+.comment .c-del { background: none; border: 0; color: #999; font-size: 11px; cursor: pointer; }
+.comment .c-del:hover { color: #c0392b; text-decoration: underline; }
+
+.comment-form { padding: 14px 16px; }
+.comment-form textarea {
+  width: 100%; min-height: 70px; border: 1px solid #c4ccd4; border-radius: 5px; padding: 10px; resize: vertical;
+}
+.comment-form .anon-row { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+.comment-form .anon-row input { border: 1px solid #c4ccd4; border-radius: 5px; padding: 7px 10px; width: 140px; }
+.comment-form .submit-row { display: flex; justify-content: flex-end; }
+
+/* 폼 */
+.form-card { padding: 18px 16px; }
+.form-row { margin-bottom: 14px; }
+.form-row label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #333; }
+.form-row input[type="text"], .form-row input[type="password"], .form-row select, .form-row textarea {
+  width: 100%; border: 1px solid #c4ccd4; border-radius: 5px; padding: 10px 12px; font-size: 14px;
+}
+.form-row textarea { min-height: 220px; resize: vertical; line-height: 1.6; }
+.form-row input:focus, .form-row textarea:focus { outline: 2px solid #9cc3e8; border-color: #1a6fc4; }
+.form-row .hint { font-size: 12px; color: #999; margin-top: 4px; }
+.form-row.inline { display: flex; gap: 10px; }
+.form-row.inline > div { flex: 1; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.auth-card { max-width: 420px; margin: 40px auto; }
+.auth-card h1 { font-size: 20px; color: #173a5e; margin-bottom: 14px; }
+
+/* 사이드/관리자 */
+.admin-tools { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+.admin-tools .row { display: flex; gap: 6px; }
+.admin-tools input { flex: 1; border: 1px solid #c4ccd4; border-radius: 5px; padding: 8px 10px; font-size: 13px; }
+.board-admin-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed #eee; }
+.board-admin-row:last-child { border-bottom: 0; }
+
+.alert-error {
+  background: #fdecea; border: 1px solid #f5c6c0; color: #b03024;
+  padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 13px;
+}
+
+.footer { text-align: center; padding: 20px; color: #9aa2ab; font-size: 12px; }
+
+.layout { display: flex; gap: 14px; align-items: flex-start; }
+.layout .main { flex: 1; min-width: 0; }
+.layout .side { width: 260px; flex-shrink: 0; }
+@media (max-width: 900px) {
+  .layout { flex-direction: column; }
+  .layout .side { width: 100%; }
+  .post-body iframe { width: 100%; }
+}
