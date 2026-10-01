@@ -166,6 +166,7 @@ table.list .author { color: #1a4d80; }
 }
 
 .footer { text-align: center; padding: 20px; color: #9aa2ab; font-size: 12px; }
+.storage-note { margin-bottom: 12px; padding: 9px 12px; background: #fff8df; border: 1px solid #ecdca4; border-radius: 6px; color: #725b17; font-size: 12px; line-height: 1.5; }
 
 .layout { display: flex; gap: 14px; align-items: flex-start; }
 .layout .main { flex: 1; min-width: 0; }
